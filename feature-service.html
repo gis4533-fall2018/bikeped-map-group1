@@ -1,0 +1,101 @@
+<!--
+  A map of points of interest around Duluth.
+ -->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Leaflet Map with a Feature Layer</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+  <!-- Load Leaflet from CDN-->
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+    integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+    integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+    crossorigin=""></script>
+
+  <!-- Load Esri Leaflet from CDN -->
+  <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
+    integrity="sha512-YZ6b5bXRVwipfqul5krehD9qlbJzc6KOGXYsDjU9HHXW2gK57xmWl2gU6nAegiErAqFXhygKIsWPKbjLPXVb2g=="
+    crossorigin=""></script>
+
+  <!-- Load Esri Leaflet Renderers from CDN -->
+  <script src="https://unpkg.com/esri-leaflet-renderers@2.0.6/dist/esri-leaflet-renderers.js"
+    integrity="sha512-mhpdD3igvv7A/84hueuHzV0NIKFHmp2IvWnY5tIdtAHkHF36yySdstEVI11JZCmSY4TCvOkgEoW+zcV/rUfo0A=="
+    crossorigin=""></script>
+
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        // add map
+        const map = L.map('map', {
+          center: [46.7700, -92.1005],
+          zoom: 12
+        });
+        // add basemap
+        const esriStreets = L.esri.basemapLayer('Gray').addTo(map);
+        
+        // add hosted feature layer for bike counts
+        const bikeCounts = L.esri.featureLayer({
+            url:'https://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/BikeCounts12_21/FeatureServer/0?token=2aFRcabMqi89VjMZGvLdUsWIv3dntrcQtiwW6h1d15ZE5H-Z_JDSiD13xHZeTbETFvnDCSw2Vtq3xDw8Lv4FN_PyLUBEvlIKDbfdqjGeViFYlONsK3H_dz_g8h_q82z4ei6eOsvX1gmnywVPu9qOe_fYLLaFNPd3OBRLXgpB1aJJhxekB3updhy3hGGRuxUzbuiWxge7D4rChKXjBRDkeeQyPjPzRceXLI9DrNeYpsvreOaKHS7RWI3hHVuwVpNH',
+            style: function(feature) {
+                
+            }
+        })
+        
+        // add hosted feature layer pedestrian counts
+        const pedCounts = L.esri.featureLayer({
+            url:'https://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/PedCounts12_21/FeatureServer/0?token=wBdicRlqQrvevQYrvyfEEpkuPLOIbxpUakfy58CiYCJ3aGYr4wgQBy9ZJ1YKTTg-mAYvzjcvULLGJTsPMsfnUvpHHZ_OrPxPq88aWGBvxq3lv2PT_-d4B_W1x9mUUA5oUOhlQyD0zUTSWI2fPcFu0JM03m3gFE1BZ0fZA7qvko8gYO9oio6ncW0EJ4nw2w9ejLC7nKvkFxkVy6LLIAG1T9u4kSSXI5RP9uu-HdVYV6GdfWUY_bRO73SdbkWdi7Xy'
+        })
+
+        var overlayMaps = {
+            "Bike Counts": bikeCounts,
+            "Pedestrian Counts": pedCounts
+        };
+        
+        // add layers to map
+        bikeCounts.addTo(map);
+        pedCounts.addTo(map);
+        
+        // add toggle controls to map
+        L.control.layers(overlayMaps).addTo(map);
+        
+        // set up popup for bike counts layer
+        bikeCounts.bindPopup(function(evt) {
+            console.log(evt.feature.properties);
+            return L.Util.template(
+              '<table style="font-size: 12px;">'+
+              '<tr><td><strong>Street: </strong></td><td>{Street_Cou}</td></tr>'+
+              '<tr><td><strong>Count: </strong></td><td>{Count_}</td></tr>'+
+              '<tr><td><strong>Use: </strong></td><td>{LevelofUse}</td></tr></table>',
+              evt.feature.properties);
+        });
+
+        // set up popup for pedestrian counts layer
+        pedCounts.bindPopup(function(evt) {
+            console.log(evt.feature.properties);
+            return L.Util.template(
+              '<table style="font-size: 12px;">'+
+              '<tr><td><strong>Street: </strong></td><td>{Street_Cou}</td></tr>'+
+              '<tr><td><strong>Count: </strong></td><td>{Count_}</td></tr>'+
+              '<tr><td><strong>Use: </strong></td><td>{LevelofUse}</td></tr></table>',
+              evt.feature.properties);
+        });
+    </script>
+</body>
+</html>
